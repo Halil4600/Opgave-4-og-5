@@ -18,12 +18,13 @@ namespace Opgave_4_og_5
             using StreamReader reader = new StreamReader(ns);
             using StreamWriter writer = new StreamWriter(ns) { AutoFlush = true };
 
+            Console.WriteLine("Connected to JSON Client.");
             bool isRunning = true;
 
             while (isRunning)
             {
                 string jsonRequest = await reader.ReadLineAsync();
-                if (jsonRequest == null) return;
+                if (jsonRequest == null) break;
 
                 var request = JsonSerializer.Deserialize<Request>(jsonRequest);
                 Console.WriteLine($"Received JSON: {jsonRequest}");
@@ -31,14 +32,21 @@ namespace Opgave_4_og_5
 
                 try
                 {
-                    result = request.Method switch
+                    if (request.Method.ToLower() == "close")
                     {
-                        "Random" => new Random().Next(request.Numbers[0], request.Numbers[1] + 1).ToString(),
-                        "Add" => request.Numbers.Sum().ToString(),
-                        "Subtract" => request.Numbers.Aggregate((a, b) => a - b).ToString(),
-                        "close" => "connection closed",
-                        _ => throw new InvalidOperationException("Invalid command")
-                    };
+                        result = "connection closed";
+                        isRunning = false;
+                    }
+                    else
+                    {
+                        result = request.Method switch
+                        {
+                            "Random" => new Random().Next(request.Numbers[0], request.Numbers[1] + 1).ToString(),
+                            "Add" => request.Numbers.Sum().ToString(),
+                            "Subtract" => request.Numbers.Aggregate((a, b) => a - b).ToString(),
+                            _ => throw new InvalidOperationException("Invalid command")
+                        };
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -54,10 +62,11 @@ namespace Opgave_4_og_5
 
                 await writer.WriteLineAsync(JsonSerializer.Serialize(response));
                 Console.WriteLine($"Sent JSON: {JsonSerializer.Serialize(response)}");
-                _client.Close();
             }
+
+            _client.Close();
         }
-      
+
         private class Request
         {
             public string Method { get; set; }

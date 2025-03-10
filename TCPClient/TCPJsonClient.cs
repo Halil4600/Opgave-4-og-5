@@ -35,9 +35,9 @@ namespace TCPClient
 
                 var request = new { Method = method, Numbers = numbers };
                 string jsonRequest = JsonSerializer.Serialize(request);
-                await writer.WriteLineAsync(jsonRequest);
+                writer.WriteLineAsync(jsonRequest);
 
-                string jsonResponse = await reader.ReadLineAsync();
+                string jsonResponse = reader.ReadLine();
                 Console.WriteLine($"Server Response: {jsonResponse}");
             }
         }
