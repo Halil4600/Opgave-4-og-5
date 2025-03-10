@@ -17,18 +17,29 @@ namespace TCPClient
             using StreamReader reader = new StreamReader(ns);
             using StreamWriter writer = new StreamWriter(ns) { AutoFlush = true };
 
-            Console.Write("Enter method (Random/Add/Subtract/close): ");
-            string method = Console.ReadLine();
+            bool isRunning = true;
 
-            Console.Write("Enter numbers (separated by space): ");
-            int[] numbers = Array.ConvertAll(Console.ReadLine().Split(' '), int.Parse);
+            while (isRunning)
+            {
+                Console.Write("Enter method (Random/Add/Subtract/close): ");
+                string method = Console.ReadLine();
 
-            var request = new { Method = method, Numbers = numbers };
-            string jsonRequest = JsonSerializer.Serialize(request);
-            await writer.WriteLineAsync(jsonRequest);
+                if (method == "close")
+                {
+                    isRunning = false;
+                    continue;
+                }
 
-            string jsonResponse = await reader.ReadLineAsync();
-            Console.WriteLine($"Server Response: {jsonResponse}");
+                Console.Write("Enter numbers (separated by space): ");
+                int[] numbers = Array.ConvertAll(Console.ReadLine().Split(' '), int.Parse);
+
+                var request = new { Method = method, Numbers = numbers };
+                string jsonRequest = JsonSerializer.Serialize(request);
+                await writer.WriteLineAsync(jsonRequest);
+
+                string jsonResponse = await reader.ReadLineAsync();
+                Console.WriteLine($"Server Response: {jsonResponse}");
+            }
         }
     }
 }

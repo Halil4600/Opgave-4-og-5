@@ -16,19 +16,27 @@ namespace TCPClient
             using StreamReader reader = new StreamReader(ns);
             using StreamWriter writer = new StreamWriter(ns) { AutoFlush = true };
 
-            Console.Write("Enter command (Random/Add/Subtract/close): ");
-            string command = Console.ReadLine();
-            await writer.WriteLineAsync(command);
+            bool isRunning = true;
 
-            if (command != "close")
+            while (isRunning)
             {
+                Console.Write("Enter command (Random/Add/Subtract/close): ");
+                string command = Console.ReadLine();
+                await writer.WriteLineAsync(command);
+
+                if (command == "close")
+                {
+                    isRunning = false;
+                    continue;
+                }
+
                 Console.Write("Enter numbers (separated by space): ");
                 string numbers = Console.ReadLine();
                 await writer.WriteLineAsync(numbers);
-            }
 
-            string response = await reader.ReadLineAsync();
-            Console.WriteLine($"Server Response: {response}");
+                string response = await reader.ReadLineAsync();
+                Console.WriteLine($"Server Response: {response}");
+            }
         }
     }
 }
